@@ -1,26 +1,32 @@
-# Building a Remote MCP Server on Cloudflare (Without Auth)
+# PostgreSQL Remote Cloudflare MCP Worker
 
 This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
 
 ## Get started: 
 
-[![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/ai/tree/main/demos/remote-mcp-authless)
+[![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare)
 
 Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
+
 ```bash
-npm create cloudflare@latest -- my-mcp-server --template=cloudflare/ai/demos/remote-mcp-authless
+npm create cloudflare@latest -- my-mcp-server --template=Stratus-Cyber/postgres-mcp-cloudflare
 ```
 
-## Customizing your MCP Server
+> ⚠️ Currently, the `Deploy to Cloudfare` button does not support configuration of evironment variables, the variable must be configured manually, after deployment.
 
-To add your own [tools](https://developers.cloudflare.com/agents/model-context-protocol/tools/) to the MCP server, define each tool inside the `init()` method of `src/index.ts` using `this.server.tool(...)`. 
+## Environment Variables
+From the Cloudflare console > select your Worker AI, go to Settings > Variables and Secrets > +Add 
+
+Type: `Secret` <br>
+Variable Name: `DATABASE_URL` <br>
+Value: `postgresql://<connection string>`
 
 ## Connect to Cloudflare AI Playground
 
 You can connect to your MCP server from the Cloudflare AI Playground, which is a remote MCP client:
 
 1. Go to https://playground.ai.cloudflare.com/
-2. Enter your deployed MCP server URL (`remote-mcp-server-authless.<your-account>.workers.dev/sse`)
+2. Enter your deployed MCP server URL (`postgres-mcp-cloudflare.<your-account>.workers.dev/sse`)
 3. You can now use your MCP tools directly from the playground!
 
 ## Connect Claude Desktop to your MCP server
@@ -38,7 +44,7 @@ Update with this configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.your-account.workers.dev/sse
+        "http://localhost:8787/sse"  // or remote-mcp-server-authless.<your-account>.workers.dev/sse
       ]
     }
   }
@@ -46,3 +52,17 @@ Update with this configuration:
 ```
 
 Restart Claude and you should see the tools become available. 
+
+## Connect Cursor AI to your MCP server
+
+On Mac OS, go to Cursor > Settings > Cursor Settings > MCP > Add new Global MCP Server > edit the `mcp.json` file
+
+```json
+{
+  "mcpServers": {
+    "postgresql-remote-mcp": {
+      "url": "https://postgresql-mcp-cloudflare.<your-account>.workers.dev/sse"
+    }
+  }
+}
+```
