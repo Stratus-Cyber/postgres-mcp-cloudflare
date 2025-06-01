@@ -1,7 +1,5 @@
 # PostgreSQL Remote Cloudflare MCP Worker
 
-This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
-
 ## Get started: 
 
 [![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare)
@@ -9,7 +7,7 @@ This example allows you to deploy a remote MCP server that doesn't require authe
 Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
 
 ```bash
-npm create cloudflare@latest -- my-mcp-server --template=Stratus-Cyber/postgres-mcp-cloudflare
+npm create cloudflare@latest -- my-mcp-server --template=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare.git
 ```
 
 > ⚠️ Currently, the `Deploy to Cloudfare` button does not support configuration of evironment variables, the variable must be configured manually, after deployment.
