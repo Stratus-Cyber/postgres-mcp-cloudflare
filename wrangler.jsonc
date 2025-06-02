@@ -4,10 +4,13 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "remote-mcp-server-authless",
+	"name": "postgres-remote-mcp",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+		"DATABASE_URL": "postgres://postgres:postgres@localhost:5432/postgres"
+	},
 	"migrations": [
 		{
 			"new_sqlite_classes": ["MyMCP"],
