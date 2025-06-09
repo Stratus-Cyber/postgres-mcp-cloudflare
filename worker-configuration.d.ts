@@ -5,6 +5,11 @@ declare namespace Cloudflare {
 	interface Env {
 		DATABASE_URL: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MyMCP>;
+		OAUTH_KV: KVNamespace;
+		GITHUB_CLIENT_ID: "1234567890";
+		GITHUB_CLIENT_SECRET: "1234567890";
+		COOKIE_ENCRYPTION_KEY: "1234567890";
+		AI: Ai;
 	}
 }
 interface Env extends Cloudflare.Env {}

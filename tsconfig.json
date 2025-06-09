@@ -5,6 +5,10 @@
 		"jsx": "react-jsx",
 		"module": "es2022",
 		"moduleResolution": "Bundler",
+		"types": [
+			"./worker-configuration.d.ts",
+			"node"
+		],
 		"resolveJsonModule": true,
 		"allowJs": true,
 		"checkJs": false,

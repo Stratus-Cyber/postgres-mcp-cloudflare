@@ -4,16 +4,22 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "postgres-remote-mcp",
+	"name": "postgres-remote-mcp-v2",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
-		"DATABASE_URL": "postgres://postgres:postgres@localhost:5432/postgres"
+		"DATABASE_URL": "postgres://postgres:postgres@localhost:5432/postgres",
+		"GITHUB_CLIENT_ID": "<github_client_id>",
+		"GITHUB_CLIENT_SECRET": "<github_client_secret>",
+		"COOKIE_ENCRYPTION_KEY": "<random_key>"
+
 	},
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MyMCP"],
+			"new_sqlite_classes": [
+				"MyMCP"
+			],
 			"tag": "v1"
 		}
 	],
@@ -24,6 +30,15 @@
 				"name": "MCP_OBJECT"
 			}
 		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "31fcf610c759413c919741dccfeb88e0"
+		}
+	],
+	"ai": {
+		"binding": "AI"
 	},
 	"observability": {
 		"enabled": true
