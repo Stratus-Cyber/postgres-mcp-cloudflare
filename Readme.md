@@ -9,11 +9,11 @@ Alternatively, you can use the command line below to get the remote MCP Server c
 ```bash
 npm create cloudflare@latest -- my-mcp-server --template=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare.git
 ```
-## GitHub OAuth App
-Create a GitHub OAuth App for Authentication. <br>
-Go to GitHub > Settings > Developer Settings > [OAuth Apps](https://github.com/settings/apps) > Select <b>New GitHub App</b> <br><br>
-Homepage URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev <br><br>`<br>
-Callback URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev/callback` <br>
+## GitHub OAuth Application
+Create a <u>GitHub OAuth App</u> for Authentication. <br>
+From GitHub > Settings > Developer Settings > [OAuth Apps](https://github.com/settings/apps) > Select <b>New GitHub App</b> <br><br>
+<b>Homepage URL</b>: `https://postgres-mcp-cloudflare.<your-account>.workers.dev`<br>
+<b>Callback URL</b>: `https://postgres-mcp-cloudflare.<your-account>.workers.dev/callback` <br>
 
 ## Environment Variables
 After deployment of the MCP Server, update the Environment Variables from the Cloudflare console > select your Worker AI, go to Settings > Variables and Secrets
