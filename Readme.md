@@ -10,7 +10,7 @@ Alternatively, you can use the command line below to get the remote MCP Server c
 npm create cloudflare@latest -- my-mcp-server --template=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare.git
 ```
 ## GitHub OAuth App
-Create a GitHub OAuth App to Authentication. <br>
+Create a GitHub OAuth App for Authentication. <br>
 Go to GitHub > Settings > Developer Settings > [OAuth Apps](https://github.com/settings/apps) > Select <b>New GitHub App</b> <br><br>
 Homepage URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev <br><br>`<br>
 Callback URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev/callback` <br>
