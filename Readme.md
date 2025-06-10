@@ -1,7 +1,7 @@
 # PostgreSQL Remote Cloudflare MCP Worker
+Remote Cloudflare MCP Worker for PostgreSQL with GitHub authentication.
 
 ## Get started: 
-
 [![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare)
 
 Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
@@ -9,15 +9,22 @@ Alternatively, you can use the command line below to get the remote MCP Server c
 ```bash
 npm create cloudflare@latest -- my-mcp-server --template=https://github.com/Stratus-Cyber/postgres-mcp-cloudflare.git
 ```
-
-> ⚠️ Currently, the `Deploy to Cloudfare` button does not support configuration of evironment variables, the variable must be configured manually, after deployment.
+## GitHub OAuth App
+Create a GitHub OAuth App for Authentication. <br>
+Go to GitHub > Settings > Developer Settings > [OAuth Apps](https://github.com/settings/apps) > Select <b>New GitHub App</b> <br><br>
+Homepage URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev <br><br>`<br>
+Callback URL: `https://postgres-mcp-cloudflare.<your-account>.workers.dev/callback` <br>
 
 ## Environment Variables
-From the Cloudflare console > select your Worker AI, go to Settings > Variables and Secrets > +Add 
+After deployment of the MCP Server, update the Environment Variables from the Cloudflare console > select your Worker AI, go to Settings > Variables and Secrets
 
-Type: `Secret` <br>
-Variable Name: `DATABASE_URL` <br>
-Value: `postgresql://<connection string>`
+| Variable Name | Recommended Type | Description | Example Value |
+|---------------|------|-------------|---------------|
+| `DATABASE_URL` | Secret | PostgreSQL connection string | `postgresql://user:password@host:5432/database` |
+| `GITHUB_CLIENT_ID` | Secret | GitHub OAuth App Client ID | `your_github_client_id` |
+| `GITHUB_CLIENT_SECRET` | Secret | GitHub OAuth App Client Secret | `your_github_client_secret` |
+| `COOKIE_ENCRYPTION_KEY` | Secret | Random key for cookie encryption | `your_random_32_char_key` |
+| `ALLOWED_USERNAMES` | Text | Comma-separated GitHub usernames | `user1,user2,user3` |
 
 ## Connect to Cloudflare AI Playground
 
@@ -25,7 +32,8 @@ You can connect to your MCP server from the Cloudflare AI Playground, which is a
 
 1. Go to https://playground.ai.cloudflare.com/
 2. Enter your deployed MCP server URL (`postgres-mcp-cloudflare.<your-account>.workers.dev/sse`)
-3. You can now use your MCP tools directly from the playground!
+3. Authenticate to GitHub
+4. You can now use your MCP tools directly from the playground!
 
 ## Connect Claude Desktop to your MCP server
 
@@ -42,7 +50,7 @@ Update with this configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.<your-account>.workers.dev/sse
+        "http://localhost:8787/sse"  // or https://postgres-mcp-cloudflare.<your-account>.workers.dev/sse
       ]
     }
   }
@@ -59,7 +67,7 @@ On Mac OS, go to Cursor > Settings > Cursor Settings > MCP > Add new Global MCP 
 {
   "mcpServers": {
     "postgresql-remote-mcp": {
-      "url": "https://postgresql-mcp-cloudflare.<your-account>.workers.dev/sse"
+      "url": "https://postgres-mcp-cloudflare.<your-account>.workers.dev/sse"
     }
   }
 }

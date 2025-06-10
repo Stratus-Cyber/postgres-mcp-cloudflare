@@ -4,16 +4,25 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "postgres-remote-mcp",
+	"name": "postgres-remote-mcp-v2",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
 	"vars": {
-		"DATABASE_URL": "postgres://postgres:postgres@localhost:5432/postgres"
+		// Non-sensitive variables can stay here
+		// Sensitive variables are now managed as secrets - see README for setup
 	},
+	// Secrets are set via CLI commands:
+	// npx wrangler secret put DATABASE_URL
+	// npx wrangler secret put GITHUB_CLIENT_ID
+	// npx wrangler secret put GITHUB_CLIENT_SECRET
+	// npx wrangler secret put COOKIE_ENCRYPTION_KEY
+	// npx wrangler secret put ALLOWED_USERNAMES
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MyMCP"],
+			"new_sqlite_classes": [
+				"MyMCP"
+			],
 			"tag": "v1"
 		}
 	],
@@ -24,6 +33,15 @@
 				"name": "MCP_OBJECT"
 			}
 		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "31fcf610c759413c919741dccfeb88e0"
+		}
+	],
+	"ai": {
+		"binding": "AI"
 	},
 	"observability": {
 		"enabled": true
