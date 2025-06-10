@@ -15,11 +15,6 @@ type Props = {
   accessToken: string;
 };
 
-const ALLOWED_USERNAMES = new Set<string>([
-  // Add GitHub usernames of users who should have access to the image generation tool
-  // For example: 'yourusername', 'coworkerusername'
-]);
-
 export class MyMCP extends McpAgent<Env, {}, Props> {
 	server = new McpServer({
 		name: "PostgreSQL Remote MCP Server with OAuth",
@@ -31,67 +26,75 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 	private readonly SCHEMA_PATH = "schema";
 
 	async init() {
+		// Get allowed usernames from environment variable
+		const allowedUsernamesStr = (this.env as any).ALLOWED_USERNAMES || "";
+		const ALLOWED_USERNAMES = new Set<string>(
+			allowedUsernamesStr
+				.split(",")
+				.map((username: string) => username.trim())
+				.filter((username: string) => username.length > 0)
+		);
 
-		    // Use the upstream access token to facilitate tools
-			this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit", {}, async () => {
-				const octokit = new Octokit({ auth: this.props.accessToken });
-				return {
-				  content: [
-					{
-					  type: "text",
-					  text: JSON.stringify(await octokit.rest.users.getAuthenticated()),
-					},
-				  ],
-				};
-			  });
-		  
-			  // Dynamically add tools based on the user's login. In this case, I want to limit
-			  // access to my Image Generation tool to just me
-			  if (ALLOWED_USERNAMES.has(this.props.login)) {
-				this.pool = new pg.Pool({
-					connectionString: (this.env as any).DATABASE_URL,
-				});
+		// Use the upstream access token to facilitate tools
+		this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit", {}, async () => {
+			const octokit = new Octokit({ auth: this.props.accessToken });
+			return {
+			  content: [
+				{
+				  type: "text",
+				  text: JSON.stringify(await octokit.rest.users.getAuthenticated()),
+				},
+			  ],
+			};
+		  });
+	  
+		  // Dynamically add tools based on the user's login. In this case, I want to limit
+		  // access to my PostgreSQL tool to allowed users
+		  if (ALLOWED_USERNAMES.has(this.props.login)) {
+			this.pool = new pg.Pool({
+				connectionString: (this.env as any).DATABASE_URL,
+			});
 
-				// Set up resource base URL for schema resources
-				if ((this.env as any).DATABASE_URL) {
-					this.resourceBaseUrl = new URL((this.env as any).DATABASE_URL);
-					this.resourceBaseUrl.protocol = "postgres:";
-					this.resourceBaseUrl.password = "";
-				}
+			// Set up resource base URL for schema resources
+			if ((this.env as any).DATABASE_URL) {
+				this.resourceBaseUrl = new URL((this.env as any).DATABASE_URL);
+				this.resourceBaseUrl.protocol = "postgres:";
+				this.resourceBaseUrl.password = "";
+			}
 
-				// Note: Resources are not implemented in this version as the McpAgent framework
-				// has different resource API requirements. Using tools instead for database inspection.
+			// Note: Resources are not implemented in this version as the McpAgent framework
+			// has different resource API requirements. Using tools instead for database inspection.
 
-				// Query tool for running read-only SQL queries
-				this.server.tool(
-					"query",
-					"Run a read-only SQL query",
-					{ sql: z.string().describe("The SQL query to execute") },
-					async ({ sql }) => {
-						if (!this.pool) {
-							throw new Error("Database pool not initialized");
-						}
-						
-							const client = await this.pool.connect();
-							try {
-							await client.query("BEGIN TRANSACTION READ ONLY");
-							const result = await client.query(sql);
-							return {
-								content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
-							};
-							} catch (error) {
-							throw new Error(`Query execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-							} finally {
-							client
-								.query("ROLLBACK")
-								.catch((error) =>
-								console.warn("Could not roll back transaction:", error),
-								);
-							client.release();
-							}
+			// Query tool for running read-only SQL queries
+			this.server.tool(
+				"query",
+				"Run a read-only SQL query",
+				{ sql: z.string().describe("The SQL query to execute") },
+				async ({ sql }) => {
+					if (!this.pool) {
+						throw new Error("Database pool not initialized");
 					}
-				);
-	}
+					
+						const client = await this.pool.connect();
+						try {
+						await client.query("BEGIN TRANSACTION READ ONLY");
+						const result = await client.query(sql);
+						return {
+							content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
+						};
+						} catch (error) {
+						throw new Error(`Query execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+						} finally {
+						client
+							.query("ROLLBACK")
+							.catch((error) =>
+							console.warn("Could not roll back transaction:", error),
+							);
+						client.release();
+						}
+				}
+			);
+}
 }
 }
 
