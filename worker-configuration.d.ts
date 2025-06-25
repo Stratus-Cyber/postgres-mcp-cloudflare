@@ -8,6 +8,7 @@ declare namespace Cloudflare {
 		GITHUB_CLIENT_SECRET: "<github_client_secret>";
 		COOKIE_ENCRYPTION_KEY: "<random_key>";
 		DATABASE_URL: string;
+        ALLOWED_USERNAMES: string;
 		MCP_OBJECT: DurableObjectNamespace<import("./src/index").MyMCP>;
 		AI: Ai;
 	}
