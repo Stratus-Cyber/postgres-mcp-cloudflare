@@ -23,7 +23,7 @@ After deployment of the MCP Server, update the Environment Variables from the Cl
 | `DATABASE_URL` | Secret | PostgreSQL connection string | `postgresql://user:password@host:5432/database` |
 | `GITHUB_CLIENT_ID` | Secret | GitHub OAuth App Client ID | `your_github_client_id` |
 | `GITHUB_CLIENT_SECRET` | Secret | GitHub OAuth App Client Secret | `your_github_client_secret` |
-| `COOKIE_ENCRYPTION_KEY` | Secret | Random key for cookie encryption | `your_random_32_char_key` |
+| `COOKIE_ENCRYPTION_KEY` | Secret | Random key for cookie encryption `openssl rand -hex 32` | `your_random_32_char_key` |
 | `ALLOWED_USERNAMES` | Text | Comma-separated GitHub usernames | `user1,user2,user3` |
 
 ## Connect to Cloudflare AI Playground
@@ -72,3 +72,9 @@ On Mac OS, go to Cursor > Settings > Cursor Settings > MCP > Add new Global MCP 
   }
 }
 ```
+
+## Troubleshooting
+
+Issue: `proxy request failed, cannot connect to the specified address`
+
+Solution: Validate your postgresql connection string is correct.
