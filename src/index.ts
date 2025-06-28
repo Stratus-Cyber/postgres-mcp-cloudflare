@@ -175,7 +175,6 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 			);
 }
 }
-}
 
 export default new OAuthProvider({
 	apiRoute: "/sse",
