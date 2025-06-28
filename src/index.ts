@@ -26,49 +26,28 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 	private readonly SCHEMA_PATH = "schema";
 
 	/**
-	 * Get the organization that owns the OAuth app
+	 * Check if user is a member of a specific organization (works for private memberships)
 	 */
-	private async getOAuthAppOrganization(): Promise<string | null> {
+	private async checkOrganizationMembership(orgName: string): Promise<boolean> {
 		try {
-			// Use basic auth with client_id and client_secret to get OAuth app info
-			const clientId = (this.env as any).GITHUB_CLIENT_ID;
-			const clientSecret = (this.env as any).GITHUB_CLIENT_SECRET;
+			const octokit = new Octokit({ auth: this.props.accessToken });
 			
-			if (!clientId || !clientSecret) {
-				console.error("GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not configured");
-				return null;
-			}
-
-			// Create a basic auth string
-			const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-			
-			// Get OAuth app information
-			const response = await fetch(`https://api.github.com/applications/${clientId}`, {
-				headers: {
-					'Authorization': `Basic ${auth}`,
-					'Accept': 'application/vnd.github.v3+json',
-					'User-Agent': 'PostgreSQL-MCP-Server'
-				}
+			// Try to get the user's membership in the specific organization
+			// This works even for private memberships when using the user's own token
+			await octokit.rest.orgs.getMembershipForAuthenticatedUser({
+				org: orgName
 			});
-
-			if (!response.ok) {
-				console.error(`Failed to get OAuth app info: ${response.status} ${response.statusText}`);
-				return null;
-			}
-
-			const appData = await response.json() as any;
 			
-			// Check if the app is owned by an organization
-			if (appData.owner && appData.owner.type === 'Organization') {
-				return appData.owner.login;
+			return true;
+		} catch (error: any) {
+			// 404 means user is not a member of the organization
+			if (error.status === 404) {
+				console.log(`User ${this.props.login} is not a member of organization: ${orgName}`);
+				return false;
 			}
 			
-			// If owned by a user, we can't use organization membership
-			console.warn("OAuth app is owned by a user, not an organization. Wildcard access not supported.");
-			return null;
-		} catch (error) {
-			console.error(`Error getting OAuth app organization: ${error}`);
-			return null;
+			console.error(`Error checking membership for organization ${orgName}: ${error}`);
+			return false;
 		}
 	}
 
@@ -81,40 +60,39 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 			return true;
 		}
 
-		// Check for wildcard access
+		// Check for wildcard access - grants access to users in allowed organizations
 		if (allowedUsernames.has("*")) {
 			try {
-				// Get the organization that owns the OAuth app
-				const githubOrg = await this.getOAuthAppOrganization();
-				if (!githubOrg) {
-					console.warn("Wildcard access (*) specified but could not determine OAuth app organization");
+				// Get allowed organizations from environment variable
+				const allowedOrgsStr = (this.env as any).GITHUB_ALLOWED_ORGANIZATIONS || "";
+				const allowedOrgs = new Set<string>(
+					allowedOrgsStr
+						.split(",")
+						.map((org: string) => org.trim())
+						.filter((org: string) => org.length > 0)
+				);
+
+				// If no organizations specified, deny access
+				if (allowedOrgs.size === 0) {
+					console.warn("Wildcard access (*) specified but GITHUB_ALLOWED_ORGANIZATIONS not configured");
 					return false;
 				}
 
-				const octokit = new Octokit({ auth: this.props.accessToken });
+				console.log(`Debug: Checking user ${this.props.login} against allowed organizations: [${Array.from(allowedOrgs).join(', ')}]`);
 				
-				// Check if user is a member of the OAuth app's organization
-				try {
-					await octokit.rest.orgs.checkMembershipForUser({
-						org: githubOrg,
-						username: this.props.login,
-					});
-					// If no error is thrown, user is a public member
-					return true;
-				} catch (publicCheckError: any) {
-					// Status 404 could mean not a member OR private membership
-					// Try to get the user's membership status (works for private members too if we have org:read scope)
-					try {
-						await octokit.rest.orgs.getMembershipForUser({
-							org: githubOrg,
-							username: this.props.login,
-						});
+				// Check if user belongs to any allowed organization
+				for (const orgName of allowedOrgs) {
+					console.log(`Debug: Checking membership in organization: ${orgName}`);
+					const isMember = await this.checkOrganizationMembership(orgName);
+					
+					if (isMember) {
+						console.log(`User ${this.props.login} granted access via organization: ${orgName}`);
 						return true;
-					} catch (membershipError) {
-						console.log(`User ${this.props.login} is not a member of organization ${githubOrg}`);
-						return false;
 					}
 				}
+
+				console.log(`User ${this.props.login} is not a member of any allowed organizations: ${Array.from(allowedOrgs).join(', ')}`);
+				return false;
 			} catch (error) {
 				console.error(`Error checking organization membership: ${error}`);
 				return false;
