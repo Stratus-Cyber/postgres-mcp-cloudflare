@@ -24,7 +24,8 @@ After deployment of the MCP Server, update the Environment Variables from the Cl
 | `GITHUB_CLIENT_ID` | Secret | GitHub OAuth App Client ID | `your_github_client_id` |
 | `GITHUB_CLIENT_SECRET` | Secret | GitHub OAuth App Client Secret | `your_github_client_secret` |
 | `COOKIE_ENCRYPTION_KEY` | Secret | Random key for cookie encryption `openssl rand -hex 32` | `your_random_32_char_key` |
-| `ALLOWED_USERNAMES` | Text | Comma-separated GitHub usernames | `user1,user2,user3` |
+| `ALLOWED_USERNAMES` | Text | Comma-separated GitHub usernames or "*" for org access | `user1,user2,user3` or `*` |
+| `GITHUB_ALLOWED_ORGANIZATIONS` | Text | Comma-separated GitHub organizations (required when using "*") | `org1,org2,org3` |
 
 ## Connect to Cloudflare AI Playground
 
