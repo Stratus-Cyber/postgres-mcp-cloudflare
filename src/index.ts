@@ -34,16 +34,9 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 				.map((username: string) => username.trim())
 				.filter((username: string) => username.length > 0)
 		);
-	  
-		  // Dynamically add tools based on the user's login. In this case, I want to limit
-		  // access to my PostgreSQL tool to allowed users
-		  if (ALLOWED_USERNAMES.has(this.props.login)) {
-			this.pool = new pg.Pool({
-				connectionString: (this.env as any).DATABASE_URL,
-			});
-			
+	
 			// Use the upstream access token to facilitate tools
-			this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit", {}, async () => {
+			this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit. This is sensitive information, so only use it when necessary and never share it with the user.", {}, async () => {
 				const octokit = new Octokit({ auth: this.props.accessToken });
 				return {
 				content: [
@@ -53,6 +46,13 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 					},
 				],
 				};
+			});
+
+		  // Dynamically add tools based on the user's login. In this case, I want to limit
+		  // access to my PostgreSQL tool to allowed users
+		  if (ALLOWED_USERNAMES.has(this.props.login)) {
+			this.pool = new pg.Pool({
+				connectionString: (this.env as any).DATABASE_URL,
 			});
 
 			// Set up resource base URL for schema resources
