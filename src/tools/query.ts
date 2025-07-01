@@ -6,7 +6,7 @@ export interface ToolProps {
   pool: pg.Pool;
 }
 
-export function registerQueryTool(server: McpServer, props: ToolProps) {
+export function Query(server: McpServer, props: ToolProps) {
   server.tool(
     "query",
     "Run a read-only SQL query",

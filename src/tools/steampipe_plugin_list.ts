@@ -5,7 +5,7 @@ export interface ToolProps {
   pool: pg.Pool;
 }
 
-export function registerSteampipePluginListTool(server: McpServer, props: ToolProps) {
+export function SteampipePluginList(server: McpServer, props: ToolProps) {
   server.tool(
     "steampipe_plugin_list",
     "List all Steampipe plugins installed on the system. Plugins provide access to different data sources like AWS, GCP, or Azure.",

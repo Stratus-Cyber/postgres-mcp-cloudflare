@@ -6,7 +6,7 @@ export interface ToolProps {
   pool: pg.Pool;
 }
 
-export function registerSteampipeTableListTool(server: McpServer, props: ToolProps) {
+export function SteampipeTableList(server: McpServer, props: ToolProps) {
   server.tool(
     "steampipe_table_list",
     "List all available Steampipe tables. Use schema and filter parameters to narrow down results.",

@@ -5,7 +5,7 @@ export interface ToolProps {
   accessToken: string;
 }
 
-export function registerUserInfoOctokitTool(server: McpServer, props: ToolProps) {
+export function UserInfoOctokit(server: McpServer, props: ToolProps) {
   server.tool(
     "userInfoOctokit", 
     "Get user info from GitHub, via Octokit", 

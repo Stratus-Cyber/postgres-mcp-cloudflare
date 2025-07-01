@@ -3,7 +3,7 @@ import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { GitHubHandler } from "./authentication/index.js";
 import * as pg from "pg";
-import { registerAuthTools, registerDatabaseTools } from "./tools/index.js";
+import { AuthTools, DatabaseTools } from "./tools/index.js";
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
@@ -38,7 +38,7 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 		// access to all tools to allowed users only
 		if (ALLOWED_USERNAMES.has(this.props.login)) {
 			// Register GitHub user info tool (only for authorized users)
-			registerAuthTools(this.server, { accessToken: this.props.accessToken });
+			AuthTools(this.server, { accessToken: this.props.accessToken });
 	  
 			this.pool = new pg.Pool({
 				connectionString: (this.env as any).DATABASE_URL,
@@ -55,7 +55,7 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 			// has different resource API requirements. Using tools instead for database inspection.
 
 			// Register database tools (only for authorized users)
-			registerDatabaseTools(this.server, { pool: this.pool });
+			DatabaseTools(this.server, { pool: this.pool });
 		}
 }
 }
@@ -68,19 +68,3 @@ export default new OAuthProvider({
 	tokenEndpoint: "/token",
 	clientRegistrationEndpoint: "/register",
   });
-
-// export default {
-// 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-// 		const url = new URL(request.url);
-
-// 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-// 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
-// 		}
-
-// 		if (url.pathname === "/mcp") {
-// 			return MyMCP.serve("/mcp").fetch(request, env, ctx);
-// 		}
-
-// 		return new Response("Not found", { status: 404 });
-// 	},
-// };

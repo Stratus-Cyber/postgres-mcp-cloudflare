@@ -6,7 +6,7 @@ export interface ToolProps {
   pool: pg.Pool;
 }
 
-export function registerSteampipePluginShowTool(server: McpServer, props: ToolProps) {
+export function SteampipePluginShow(server: McpServer, props: ToolProps) {
   server.tool(
     "steampipe_plugin_show",
     "Get details for a specific Steampipe plugin installation, including version, memory limits, and configuration.",
