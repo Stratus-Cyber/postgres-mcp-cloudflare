@@ -1,9 +1,9 @@
 import OAuthProvider from "@cloudflare/workers-oauth-provider";
 import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { GitHubHandler } from "./github-handler";
+import { GitHubHandler } from "./authentication/index.js";
 import * as pg from "pg";
-import { registerUserInfoOctokitTool, registerQueryTool, registerSteampipeTableShowTool } from "./tools/index.js";
+import { registerAuthTools, registerDatabaseTools } from "./tools/index.js";
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
@@ -33,13 +33,13 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 				.map((username: string) => username.trim())
 				.filter((username: string) => username.length > 0)
 		);
-	
-		// Register GitHub user info tool (always available for authenticated users)
-		registerUserInfoOctokitTool(this.server, { accessToken: this.props.accessToken });
 
-		// Dynamically add database tools based on the user's login
-		// Limit access to PostgreSQL tools to allowed users
+		// Dynamically add tools based on the user's login. In this case, I want to limit
+		// access to all tools to allowed users only
 		if (ALLOWED_USERNAMES.has(this.props.login)) {
+			// Register GitHub user info tool (only for authorized users)
+			registerAuthTools(this.server, { accessToken: this.props.accessToken });
+	  
 			this.pool = new pg.Pool({
 				connectionString: (this.env as any).DATABASE_URL,
 			});
@@ -54,11 +54,10 @@ export class MyMCP extends McpAgent<Env, {}, Props> {
 			// Note: Resources are not implemented in this version as the McpAgent framework
 			// has different resource API requirements. Using tools instead for database inspection.
 
-			// Register database tools
-			registerQueryTool(this.server, { pool: this.pool });
-			registerSteampipeTableShowTool(this.server, { pool: this.pool });
+			// Register database tools (only for authorized users)
+			registerDatabaseTools(this.server, { pool: this.pool });
 		}
-	}
+}
 }
 
 export default new OAuthProvider({
@@ -69,3 +68,19 @@ export default new OAuthProvider({
 	tokenEndpoint: "/token",
 	clientRegistrationEndpoint: "/register",
   });
+
+// export default {
+// 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+// 		const url = new URL(request.url);
+
+// 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
+// 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
+// 		}
+
+// 		if (url.pathname === "/mcp") {
+// 			return MyMCP.serve("/mcp").fetch(request, env, ctx);
+// 		}
+
+// 		return new Response("Not found", { status: 404 });
+// 	},
+// };
